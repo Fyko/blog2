@@ -1,0 +1,72 @@
+---
+title: "Using Git Hooks with Yarn 3"
+date: "2023-04-24"
+description: "Is there a better option than Husky with Yarn 3?"
+slug: plugin-git-hooks
+banner: "./assets/banner.png"
+tags:
+  - Node
+  - Automation
+---
+
+import T from "🧱/T.astro"
+
+With Yarn 2, you could easily install Husky by setting your package to private and defining a `postinstall` script:
+
+```json
+{
+  "private": true,
+  "scripts": {
+    "postinstall": "husky install"
+  },
+  "packageManager": "yarn@2.4.3"
+}
+```
+
+However, Yarn 3 doesn't seem to work with `postinstall`. This means that you can't use Husky with Yarn 3 without some extra work.
+
+## First iteration: plugin-install-husky
+
+Wanna know what awesome feature Yarn 3 has? A plugin system! This means that you can write your own plugins to extend Yarn's functionality.
+
+At [Truffle](https://truffle.vip?utm-source=blog.fyko.net), we've been using this short script to install Husky.
+
+```js
+// Creative Commons (c) 2022 Spore, Inc. 
+const { exec } = require('child_process');
+
+const plugin = {
+  default: {
+    hooks: {
+      afterAllInstalled: async () =>
+        exec('git config core.hooksPath .github/hooks'),
+    },
+  },
+};
+
+module.exports = {
+  name: 'plugin-install-husky',
+  factory: () => plugin,
+};
+```
+But, frankly, since we have plugins, we don't really <T>need</T> to use Husky. Introducing...
+
+## ✨ plugin-git-hooks ✨
+
+Lets eject Husky! Start by running `yarn remove husky` and delete the `postinstall` script from `package.json`.
+
+Now, you can move your scripts from `.husky` to anywhere else. I recommend `.github/hooks`.
+
+Then, import the plugin.
+```console
+$ yarn plugin import https://raw.githubusercontent.com/trufflehq/yarn-plugin-git-hooks/main/bundles/%40yarnpkg/plugin-git-hooks.js
+```
+
+Finally, add the path to your hooks in `.yarnrc.yml`:
+```yaml
+gitHooksPath: .github/hooks
+```
+
+Now, whenever you run `yarn` (once packages are installed), your hooks will be configured.
+
+Shout my boss for letting me [open-source this plugin](https://github.com/trufflehq/yarn-plugin-git-hooks)!

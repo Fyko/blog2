@@ -4,31 +4,21 @@ import ExternalLink from "./ExternalLink.astro";
 import Email from "./icons/Email.astro";
 import Github from "./icons/Github.astro";
 import Twitter from "./icons/Twitter.astro";
-import ItsMe from "./ItsMe.astro";
-import avatarMj from "@assets/avatars/xetera_mj_2.jpeg";
+import avatar from "@assets/avatars/current.jpeg";
 ---
 
 <div class="flex flex-col md:flex-row justify-between w-full gap-8">
   <div class="flex flex-col gap-4 flex-grow-0 max-w-[44rem] text-xl leading-8">
     <h1 class="text-5xl sm:text-6xl lg:text-7xl font-900 mb-2">
-      Hi, I'm Xetera.
+      Hi, I'm Carter.
     </h1>
 
     <div class="color-text-400 flex flex-col gap-4">
       <p>
-        I love making ideas come to life with code. I'm a huge fan of functional
-        programming and anti-abuse + trust & safety.
+        This is just my blog site.
       </p>
       <p>
-        I've recently been learning about reverse engineering, security, and
-        internet censorship. I like both kpop and metal, and think pineapple
-        belongs on pizza.
-      </p>
-      <p>
-        I'm currently based in <del class="color-text-100 -rotate-9 inline-flex"
-          >Turkey</del
-        >
-         Türkiye, Istanbul but also in general as well.
+        My main site is at <a class="underlined inline-flex items-center gap-2 color-text-800" href="https://fyko.net">fyko.net</a>
       </p>
     </div>
     <div class="flex flex-col gap-2">
@@ -82,7 +72,7 @@ import avatarMj from "@assets/avatars/xetera_mj_2.jpeg";
   </div>
 
   <div
-    class="relative w-full lg:max-w-[390px] max-w-[300px] aspect-ratio-1 flex-shrink-0 group relative h-min"
+    class="relative w-full lg:max-w-[300px] max-w-[300px] aspect-ratio-1 flex-shrink-0 group relative h-min"
   >
     <span
       class="rounded-md image-container -z-1 outline outline-1 outline-body-800"
@@ -92,12 +82,11 @@ import avatarMj from "@assets/avatars/xetera_mj_2.jpeg";
       alt="Profile picture"
       quality={100}
       class="rounded-md z-2 outline outline-1 rounded outline-body-500 h-full bg-body-900"
-      src={avatarMj}
-      width={400}
-      height={400}
+      src={avatar}
+      width={300}
+      height={300}
       sizes=""
     />
-    <ItsMe />
   </div>
 </div>
 

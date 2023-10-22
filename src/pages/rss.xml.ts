@@ -9,8 +9,8 @@ export async function get(context: APIContext) {
     throw new Error("Site configuration is missing!");
   }
   return rss({
-    title: "Xetera's Blog",
-    description: "My humble rambles",
+    title: "Fyko's Blog",
+    description: "read my mainsplaining and complaining",
     site: context.site.origin,
     stylesheet: "/pretty-feed-v3.xsl",
     items: blog

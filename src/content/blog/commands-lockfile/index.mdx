@@ -1,0 +1,144 @@
+---
+title: "Continous Deployment of Discord Slash Commands"
+date: "2023-04-24"
+description: "This is what lockfiles were made for."
+slug: commands-lockfile
+banner: "./assets/banner.png"
+tags:
+  - Node
+  - Automation
+---
+
+import T from "🧱/T.astro"
+import Caption from "🧱/Caption.astro"
+
+How do you automatically update your Discord slash commands?
+
+<T>Simple. Use a lockfile.</T>
+
+Package managers everywhere use it! Cargo, Mix, Yarn... why can't you?
+
+## Refactoring
+When working on my Discord bot, [Thoth](https://github.com/fyko/thoth), I was trying to figure out how to automatically update my slash commands.
+
+Originally, I stored all my command data in the same file as the command itself, but it
+ended up biting me in the ass when it came to scripting. I'd have to configure my DI with
+valid services like Redis and Postgres just to pull out static data.
+
+So, I moved all the static definitions into their own files and folders.
+
+### Before
+```typescript
+// src/commands/util/ping.ts
+const data = {
+	name: i18n.t('commands.ping.meta.name'),
+	name_localizations: fetchDataLocalizations('commands.ping.meta.name'),
+	description: i18n.t('commands.ping.meta.description'),
+	description_localizations: fetchDataLocalizations('commands.ping.meta.description'),
+} as const;
+
+export default class implements Command {
+	public readonly data = data;
+
+	public exec = async (...) => {};
+}
+```
+
+### After
+```ts
+// src/interactions/commands/util/ping.ts
+const PingCommand = {
+	name: i18n.t('commands.ping.meta.name'),
+	name_localizations: fetchDataLocalizations('commands.ping.meta.name'),
+	description: i18n.t('commands.ping.meta.description'),
+	description_localizations: fetchDataLocalizations('commands.ping.meta.description'),
+} as const;
+
+export default PingCommand;
+```
+
+## Generating a lockfile
+
+Now that the command data is in its own files, all I have to worry about is loading my i18n, and I can use the data.
+
+```ts
+import 'reflect-metadata';
+
+import { writeFile } from 'node:fs/promises';
+import { join } from 'node:path';
+import process from 'node:process';
+import { fileURLToPath, URL } from 'node:url';
+import { loadTranslations, walk } from '#util/index.js';
+
+export async function generateCommandsArray(): Promise<Record<string, unknown>[]> {
+	const path = fileURLToPath(new URL('../interactions/commands', import.meta.url));
+	const files = await walk(path);
+
+	const commands: Record<string, unknown>[] = [];
+	for (const file of files) {
+		const { default: command } = await import(file);
+		commands.push(command);
+	}
+
+	return commands;
+}
+
+async function main() {
+	await loadTranslations(fileURLToPath(new URL('../locales', import.meta.url)));
+
+	const commands = (await generateCommandsArray()).filter((cmd) => !cmd.dev);
+	return writeFile(join(process.cwd(), 'commands.lock.json'), JSON.stringify(commands, null, 2));
+}
+
+void main();
+```
+
+Using `plugin-git-hooks` (which you can read about [here](/articles/plugin-git-hooks)), I can run this script before every commit.
+
+```bash
+#!/bin/sh
+yarn run build && yarn run generate && git add commands.lock.json
+```
+And bingo! Every time I commit, my lockfile will be updated.
+
+## The automatic part
+Since the lockfile is included in version control (git), we can use GitHub Actions to update the commands when the file changes.
+
+Lets get this out of the way now -- you need to upload your bot's token and application ID.
+Head over to `https://github.com/{GITHUB_USER}/{GITHUB_REPO}/settings/secrets/actions` and add two secrets, `DISCORD_APPLICATION_ID` and `DISCORD_TOKEN`.
+
+Finally, create your the workflow file.
+
+```yaml
+# github/workflows/cd_commands.yml
+name: Continuous Deployment (commands)
+
+on:
+  push:
+	branches: [main]
+	paths:
+	  - 'commands.lock.json'
+	  - '.github/workflows/cd_commands.yml'
+  workflow_dispatch:
+
+jobs:
+  deploy:
+	name: Deploy Updated Global Commands
+	runs-on: ubuntu-latest
+
+	steps:
+	  - uses: actions/checkout@v3
+
+	  - name: PUT Global Commands
+		run: |
+		  curl -X PUT https://discord.com/api/applications/${{ secrets.DISCORD_APPLICATION_ID }}/commands \\
+			-H "Authorization: Bot ${{ secrets.DISCORD_TOKEN }}" \\
+			-H "content-type: application/json" \\
+			-d @./commands.lock.json
+```
+Now, whenever you push to the main branch, your commands will be updated! Additionally, if the workflow file changes, it'll run.
+You also have the option to run it manually with Workflow Dispatch.
+
+If you wanna see this code in action, check out:
+- [The workflow file](https://github.com/fyko/thoth/blob/main/.github/workflows/cd_commands.yml)
+- [The generation script](https://github.com/Fyko/thoth/blob/main/services/bot/src/scripts/generate.ts)

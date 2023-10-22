@@ -7,16 +7,13 @@ import Rss from "🧱/icons/Rss.astro";
 import { sub } from "date-fns";
 import SectionHeader from "🧱/SectionHeader.astro";
 import HomepageSection from "🧱/HomepageSection.astro";
-import BookGrid from "🧱/kindle/BookGrid.astro";
 import Ultrawide from "🧱/misc/Ultrawide.astro";
-import SpotifySidebar from "🧱/spotify/SpotifySidebar.astro";
-import { LanyardStatus } from "🧱/lanyard/LanyardStatus";
 import { getAllContent } from "🛠️/content";
 
 const visiblePosts = await getAllContent();
 ---
 
-<Layout title="Xetera">
+<Layout title="Fyko">
   <Navbar />
   <main class="flex justify-center w-full my-7xl lg:my-[10%] homepage mx-6">
     <div
@@ -25,7 +22,8 @@ const visiblePosts = await getAllContent();
       <div class="mb-8">
         <Bio />
       </div>
-      <div class="grid grid-cols-3 gap-8">
+      <!-- find a way to center without using the full width -->
+      <div class="w-full">
         <div
           class="col-span-full lg:col-span-2 homepage-grid gap-8 flex flex-col"
         >
@@ -55,15 +53,14 @@ const visiblePosts = await getAllContent();
               }
             </div>
           </HomepageSection>
-          <BookGrid />
           <p class="color-text-300 text-sm">
-            Looking for the old site? It's still up on <a
+            This is based on <a
               class="color-brand-500"
-              href="https://old.xetera.dev">old.xetera.dev</a
-            >
+              href="https://xetera.dev">Xetera's blog</a
+            >.
           </p>
         </div>
-        <div class="col-span-full lg:col-span-1 flex flex-col gap-8">
+        <!-- <div class="col-span-full lg:col-span-1 flex flex-col gap-8">
           {
             import.meta.env.DISCORD_ID && (
               <LanyardStatus
@@ -72,8 +69,7 @@ const visiblePosts = await getAllContent();
               />
             )
           }
-          <SpotifySidebar />
-        </div>
+        </div> -->
       </div>
     </div>
   </main>

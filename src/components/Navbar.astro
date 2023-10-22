@@ -1,6 +1,6 @@
 ---
-import { Image } from "astro:assets";
-import avatar from "../assets/avatars/xetera.png";
+// import { Image } from "astro:assets";
+// import avatar from "../assets/avatars/current.jpeg";
 ---
 
 <nav class="px-6 py-4 top-0 w-full navbar" id="navbar">
@@ -9,14 +9,15 @@ import avatar from "../assets/avatars/xetera.png";
       {
         Astro.url.pathname !== "/" && (
           <a href="/" rel="prefetch">
-            <Image
+            <h2 class="hover:scale-110 transition-all w-[50px] text-4xl">🤠</h2>
+            <!-- <Image
               class="hover:scale-110 transition-all w-[50px]"
               src={avatar}
               alt="Home button"
               quality="high"
               height={140}
               width={140}
-            />
+            /> -->
           </a>
         )
       }
